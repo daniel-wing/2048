@@ -17,7 +17,6 @@
  * every context where the app is served on its own.
  */
 
-import { ScrollViewStyleReset } from 'expo-router/html';
 import React from 'react';
 
 /**
@@ -178,6 +177,38 @@ const globalCss = `
   to auto lets flex-grow do the real work: absorb the leftover space so the
   footer sits at the bottom, without inventing a viewport's worth of height.
 */
+/*
+  The DOCUMENT scrolls, so the document must be allowed to grow.
+
+  expo-router ships a ScrollViewStyleReset component that emits
+  height:100% on #root, body and html, plus overflow:hidden on body. Right for
+  its default model, where a React Native ScrollView inside the app does the
+  scrolling — but this app renders each screen in a plain View precisely so the
+  page scrolls like every other page on the site, with the header and footer
+  around it. Under that reset the body was pinned to exactly the viewport with
+  its overflow clipped.
+
+  Desktop browsers hid the problem: they still honour a wheel or a scrollbar,
+  and scripted scrolling kept working, so it tested fine. iOS Safari does not —
+  with overflow:hidden on the body, touch scrolling is simply dead, which is
+  how the Settings screen became unscrollable on an iPhone.
+
+  The reset is no longer emitted, and these rules state what this app needs
+  outright rather than relying on its absence.
+*/
+html {
+  height: auto;
+}
+
+body {
+  height: auto;
+  min-height: 100vh;
+  /* Vertical must stay scrollable; horizontal stays clipped so a stray wide
+     element can never produce a sideways scrollbar. */
+  overflow-y: visible;
+  overflow-x: hidden;
+}
+
 #root {
   width: 100%;
   flex: 1 0 auto;
@@ -314,9 +345,6 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="2048" />
-
-        {/* Expo's reset for scroll containers on web. */}
-        <ScrollViewStyleReset />
 
         <style dangerouslySetInnerHTML={{ __html: globalCss }} />
 
