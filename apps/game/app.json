@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "2048 — Ad-Free",
+    "slug": "2048-adfree",
+    "scheme": "adfree2048",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#275973"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "cx.wing.adfree2048"
+    },
+    "android": {
+      "package": "cx.wing.adfree2048",
+      "adaptiveIcon": {
+        "backgroundColor": "#275973",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true,
+      "//": "Published under wing.cx/ships/2048, so every emitted asset URL must carry that prefix. Serving at the domain root would need this set back to '/'.",
+      "baseUrl": "/ships/2048"
+    }
+  }
+}

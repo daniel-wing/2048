@@ -1,0 +1,22 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+.env*.local
+apps/game/.expo/
+apps/game/dist/
+
+# Editor and tooling state. `.claude/` is owned by tooling whose future writes
+# we do not control (session transcripts, caches, local permission grants), so
+# it is ignored wholesale and the one file worth sharing is allow-listed back.
+.claude/*
+!.claude/launch.json
+.vscode/
+.idea/
+
+# Build and test artefacts
+coverage/
+*.tsbuildinfo
+packages/engine/dist/

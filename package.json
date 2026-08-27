@@ -1,0 +1,18 @@
+{
+  "name": "2048-adfree",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A free, ad-free, tracking-free 2048. Web first, then iOS and Android.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "web": "npm run web --workspace @2048/game",
+    "web:clear": "npm run web:clear --workspace @2048/game",
+    "build:web": "npm run export:web --workspace @2048/game"
+  }
+}
