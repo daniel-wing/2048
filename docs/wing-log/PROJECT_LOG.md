@@ -75,3 +75,32 @@ routing, all left uncommitted for review.
 
 **Left open:** everything in the site repo is staged and uncommitted by request.
 Nothing is live on wing.cx yet.
+
+### 2026-08-27 - Published
+
+**Summary:** Worked through the pre-publication audit, then published. The game
+source is now a public repo at github.com/daniel-wing/2048, and wing.cx carries
+its build at /ships/2048 along with two site-wide changes the audit forced.
+
+**Topics touched:** topic-visual-identity, topic-privacy-and-licensing
+
+**Key outcomes:**
+- Data safety first: a corrupt save used to blank the page on every subsequent
+  load with no way back. Both other stores gained pass-through migrations before
+  they are needed, since Zustand discards persisted state on an un-migrated
+  version bump. Persisted history is capped so writes stay synchronous, which is
+  what makes the debounce data-loss race impossible rather than merely unlikely.
+- The board is now a real grid to a screen reader, in row-major order with
+  coordinates and empty squares announced. It was previously unusable.
+- The site gradient was darkened because white text on it measured 2.99:1
+  against a 4.5:1 bar. `scripts/check-contrast.mjs` now computes every pairing
+  and fails on a regression; it found 19 the audits between them had not.
+- "Zero network requests" was corrected everywhere. It was false — the app loads
+  its own bundle and fonts — and on a project whose pitch is verifiable honesty
+  that mattered more than it would elsewhere.
+- Icons replaced: the placeholders still had their construction guides visible.
+
+**Left open:** the §4 performance work. The expectimax search still blocks the
+main thread for an estimated 110-220ms on a mid-range phone, which makes Pause
+feel unresponsive during a watched endgame. It affects only /watch — the game
+never runs the AI. Next commit.
