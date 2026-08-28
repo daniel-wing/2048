@@ -415,18 +415,16 @@ export default function Root({ children }: { children: React.ReactNode }) {
 
         {children}
 
+        {/*
+          Deliberately NOT a copy of the site's footer: the WhatsApp link is
+          left out here. It carries a personal phone number in its href, and
+          this page's source is a public repo whose build is also served from a
+          second origin. Do not restore it for parity with the site.
+        */}
         <footer className="site-footer">
           <span data-i18n="footer.copyright">© Daniel Wing</span>
           <a href="/">wing.cx</a>
           <a href="mailto:wing@wing.cx">wing@wing.cx</a>
-          <a
-            href="https://wa.me/525531343238"
-            target="_blank"
-            rel="noopener noreferrer"
-            data-i18n="nav.whatsapp"
-          >
-            WhatsApp
-          </a>
           <a
             href="https://www.linkedin.com/in/daniel-wing"
             target="_blank"

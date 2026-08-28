@@ -185,4 +185,10 @@ footer, because those load from the site's root. The fallback chrome in
 EN/ES toggle and the nav labels are inert there, since `site.js` owns both. That
 is the intended split and the reason for the robots.txt above.
 
+**Also:** the WhatsApp link came out of this page's footer, at the owner's
+request. Its href carried a personal phone number, and this page's source is a
+public repo whose build is now served from a second origin as well. The site
+keeps its own copy; only the game's footer diverges, and there is a comment at
+the markup saying so, since the obvious "fix" is to restore parity.
+
 **Left open:** still the §4 performance work.
