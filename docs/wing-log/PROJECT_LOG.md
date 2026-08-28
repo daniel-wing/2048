@@ -104,3 +104,44 @@ its build at /ships/2048 along with two site-wide changes the audit forced.
 main thread for an estimated 110-220ms on a mid-range phone, which makes Pause
 feel unresponsive during a watched endgame. It affects only /watch — the game
 never runs the AI. Next commit.
+
+### 2026-08-27 - Spanish, following the site's toggle
+
+**Summary:** The site has had an EN/ES toggle since before the game existed; the
+game ignored it and rendered English underneath a Spanish header. Added a full
+translation layer — every user-facing string in both languages, driven by the
+site's own language choice, switching live without a reload.
+
+**Topics touched:** topic-visual-identity, topic-architecture
+
+**Key outcomes:**
+- **The site owns the language, the game owns its words.** Strings live in the
+  app rather than in the site's `assets/i18n.js`, because Phase 2 native has no
+  `site.js` and no `window.wingT` to call. The game subscribes to the site's
+  `wing:languagechange` event on web and reads the device locale on native, so
+  the same screens work in both hosts. `useLanguage` is platform-split for
+  exactly that reason.
+- The resolution order (`window.WING_LANG`, `?lang=`, localStorage, browser,
+  English) deliberately duplicates site.js's rather than calling into it. The
+  game renders before site.js necessarily has, and has to be correct when
+  site.js is absent entirely.
+- English is the fallback for every key, so a missing Spanish string shows real
+  English words rather than an empty element or a raw key.
+- **Achievements were the one place that broke that promise.** Their keys are
+  built from engine ids at runtime, and the dictionary had been written from
+  memory instead of read off the engine — `tile-128`, `dedicated` and three
+  others had no key at all, so the Stats screen printed `achv.tile-128.label`
+  at the player. The six tile goals now share one parametric string, unknown
+  ids fall back to the engine's own English wording, and a test asserts over
+  the engine's real list so the two cannot drift again.
+- **Document titles never updated.** `<Head>` from expo-router writes the title
+  into each prerendered file, which is what crawlers read, but does not touch
+  it at runtime on a static export — a loaded page has two `<title>` elements
+  and the first, written in English at export time, wins. A platform-split
+  `useDocumentTitle` sets it directly, so the tab follows the toggle too.
+
+**Left open:** still the §4 performance work. Also worth noting for later: the
+shell in `+html.tsx` emits a `<title>` that every route then duplicates. Two
+title elements is invalid HTML and the shell's one always loses, but a comment
+there records that removing it once left routes untitled, so it was left alone
+rather than re-broken on the way out the door.

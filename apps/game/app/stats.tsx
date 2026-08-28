@@ -11,11 +11,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PageScroll } from '../src/components/PageScroll';
 import { Card, Row } from '../src/components/ui';
+import { describeAchievement } from '../src/i18n/achievements';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { useStatsStore } from '../src/stores/statsStore';
 import { useTheme } from '../src/theme/useTheme';
 
 export default function StatsScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.stats.title'));
   const insets = useSafeAreaInsets();
   const stats = useStatsStore((s) => s.stats);
 
@@ -23,14 +28,14 @@ export default function StatsScreen() {
   const unlockedCount = unlocked.filter((a) => a.achieved).length;
 
   const rows: Array<[string, string]> = [
-    ['Best score', stats.bestScore.toLocaleString()],
-    ['Highest tile', stats.highestTile ? String(stats.highestTile) : '—'],
-    ['Games played', String(stats.gamesStarted)],
-    ['Games won', String(stats.gamesWon)],
-    ['Longest win streak', String(stats.longestWinStreak)],
-    ['Total moves', stats.totalMoves.toLocaleString()],
-    ['Total merges', stats.totalMerges.toLocaleString()],
-    ['Lifetime score', stats.totalScore.toLocaleString()],
+    [t('stats.bestScore'), stats.bestScore.toLocaleString()],
+    [t('stats.highestTile'), stats.highestTile ? String(stats.highestTile) : '—'],
+    [t('stats.gamesPlayed'), String(stats.gamesStarted)],
+    [t('stats.gamesWon'), String(stats.gamesWon)],
+    [t('stats.longestStreak'), String(stats.longestWinStreak)],
+    [t('stats.totalMoves'), stats.totalMoves.toLocaleString()],
+    [t('stats.totalMerges'), stats.totalMerges.toLocaleString()],
+    [t('stats.lifetimeScore'), stats.totalScore.toLocaleString()],
   ];
 
   return (
@@ -43,15 +48,15 @@ export default function StatsScreen() {
     >
       {/* Route titles live here now that the layout uses Slot. */}
       <Head>
-        <title>Stats · 2048</title>
-        <meta name="description" content="Your lifetime 2048 statistics and achievements." />
+        <title>{t('meta.stats.title')}</title>
+        <meta name="description" content={t('meta.stats.title')} />
       </Head>
 
       <View style={styles.inner}>
         <Row style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Stats</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('stats.title')}</Text>
           <Link href="/" style={[styles.link, { color: theme.colors.accent }]}>
-            Done
+            {t('nav.done')}
           </Link>
         </Row>
 
@@ -72,7 +77,7 @@ export default function StatsScreen() {
 
         <Card theme={theme}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Achievements ({unlockedCount}/{unlocked.length})
+            {t('stats.achievements', { unlocked: unlockedCount, total: unlocked.length })}
           </Text>
           <View style={styles.achievementList}>
             {unlocked.map((achievement) => (
@@ -86,7 +91,7 @@ export default function StatsScreen() {
                   ]}
                   // The glyph reads as "black star"/"white star", which says
                   // nothing about the achievement. Label it and hide the shape.
-                  accessibilityLabel={achievement.achieved ? 'Unlocked' : 'Locked'}
+                  accessibilityLabel={achievement.achieved ? t('stats.unlocked') : t('stats.locked')}
                 >
                   {achievement.achieved ? '★' : '☆'}
                 </Text>
@@ -99,10 +104,10 @@ export default function StatsScreen() {
                       },
                     ]}
                   >
-                    {achievement.label}
+                    {describeAchievement(achievement, t).label}
                   </Text>
                   <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-                    {achievement.description}
+                    {describeAchievement(achievement, t).description}
                   </Text>
                 </View>
               </Row>

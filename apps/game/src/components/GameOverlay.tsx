@@ -6,6 +6,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Theme } from '../theme/palettes';
+import { useT } from '../i18n/useT';
 import { Button, Row } from './ui';
 
 export type GameOverlayProps = {
@@ -30,6 +31,7 @@ export function GameOverlay({
   onUndo,
   canUndo = false,
 }: GameOverlayProps) {
+  const t = useT();
   const won = kind === 'won';
 
   return (
@@ -39,21 +41,23 @@ export function GameOverlay({
       accessibilityLiveRegion="assertive"
     >
       <Text style={[styles.title, { color: theme.colors.text }]}>
-        {won ? 'You win!' : 'Game over'}
+        {won ? t('overlay.won') : t('overlay.over')}
       </Text>
       <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
-        {won ? `You reached ${winTarget} with ${score} points.` : `Final score: ${score}`}
+        {won
+          ? t('overlay.won.detail', { target: winTarget, score })
+          : t('overlay.over.detail', { score })}
       </Text>
 
       <Row style={styles.actions}>
         {won && onKeepPlaying ? (
-          <Button label="Keep going" onPress={onKeepPlaying} theme={theme} />
+          <Button label={t('overlay.keepPlaying')} onPress={onKeepPlaying} theme={theme} />
         ) : null}
         {!won && canUndo && onUndo ? (
-          <Button label="Undo" onPress={onUndo} theme={theme} variant="secondary" />
+          <Button label={t('game.undo')} onPress={onUndo} theme={theme} variant="secondary" />
         ) : null}
         <Button
-          label="New game"
+          label={t('game.newGame')}
           onPress={onNewGame}
           theme={theme}
           variant={won ? 'secondary' : 'primary'}

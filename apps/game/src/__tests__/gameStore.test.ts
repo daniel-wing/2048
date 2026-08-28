@@ -6,9 +6,11 @@
  * transient animation state, and the settings interaction.
  */
 
-import { gameFromGrid } from '@2048/engine';
+import { achievements, emptyStats, gameFromGrid } from '@2048/engine';
 
 import { describeOutcome } from '../components/MoveAnnouncer';
+import { describeAchievement } from '../i18n/achievements';
+import { translate, type StringKey } from '../i18n/strings';
 import { useGameStore } from '../stores/gameStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useStatsStore } from '../stores/statsStore';
@@ -292,6 +294,10 @@ describe('lifetime stats bookkeeping', () => {
   });
 });
 
+/** A translator bound to one language, matching what useT() hands the component. */
+const speak = (lang: 'en' | 'es') =>
+  (key: StringKey, vars?: Record<string, string | number>) => translate(lang, key, vars);
+
 describe('move outcomes for the screen reader', () => {
   it('reports a rejected move, which the board cannot show', () => {
     // Everything hard left already: moving left again is illegal.
@@ -307,7 +313,7 @@ describe('move outcomes for the screen reader', () => {
 
     const outcome = useGameStore.getState().lastOutcome!;
     expect(outcome.moved).toBe(false);
-    expect(describeOutcome(outcome)).toBe('No move left.');
+    expect(describeOutcome(outcome, speak('en'))).toBe('No move left.');
   });
 
   it('bumps the sequence even when nothing moved, so repeats are announced', () => {
@@ -340,7 +346,7 @@ describe('move outcomes for the screen reader', () => {
     expect(outcome.moved).toBe(true);
     expect(outcome.merged).toEqual([4]);
 
-    const spoken = describeOutcome(outcome);
+    const spoken = describeOutcome(outcome, speak('en'));
     expect(spoken).toContain('Moved left.');
     expect(spoken).toContain('Merged to 4.');
     expect(spoken).toContain('Score 4.');
@@ -348,14 +354,82 @@ describe('move outcomes for the screen reader', () => {
   });
 
   it('uses one-based coordinates, since they are spoken to a person', () => {
-    const spoken = describeOutcome({
-      seq: 1,
-      dir: 'up',
-      moved: true,
-      merged: [],
-      score: 0,
-      spawned: { value: 2, row: 0, col: 0 },
-    });
+    const spoken = describeOutcome(
+      {
+        seq: 1,
+        dir: 'up',
+        moved: true,
+        merged: [],
+        score: 0,
+        spawned: { value: 2, row: 0, col: 0 },
+      },
+      speak('en'),
+    );
     expect(spoken).toContain('row 1, column 1');
+  });
+
+  it('speaks Spanish when Spanish is in effect', () => {
+    // The announcement is the only feedback a screen-reader user gets, so it
+    // has to follow the site's language toggle like everything else.
+    const outcome = {
+      seq: 1,
+      dir: 'left' as const,
+      moved: true,
+      merged: [4],
+      score: 4,
+      spawned: { value: 2, row: 2, col: 3 },
+    };
+
+    const spoken = describeOutcome(outcome, speak('es'));
+    expect(spoken).toContain('Moviste hacia la izquierda.');
+    expect(spoken).toContain('Se combinaron en 4.');
+    expect(spoken).toContain('fila 3, columna 4');
+    // Word boundaries matter here: a naive /column/ matches inside "columna".
+    expect(spoken).not.toMatch(/\bMoved\b|\brow\b|\bcolumn\b/);
+  });
+
+  it('falls back to English for a key with no translation', () => {
+    // A half-translated screen should read, not show raw keys.
+    expect(translate('es', 'theme.wing')).toBe('Wing');
+  });
+});
+
+describe('achievement translation', () => {
+  /*
+    The regression that prompted this: the dictionary was written from memory
+    rather than read off the engine, so ids like `tile-128` and `dedicated` had
+    no key and the Stats screen printed `achv.tile-128.label` to the player.
+    Asserting over the engine's real list is what makes drift impossible.
+  */
+  const ALL = achievements(emptyStats);
+
+  it.each(['en', 'es'] as const)('renders every engine achievement in %s', (lang) => {
+    expect(ALL.length).toBeGreaterThan(0);
+
+    for (const achievement of ALL) {
+      const { label, description } = describeAchievement(achievement, speak(lang));
+
+      expect(label).not.toContain('achv.');
+      expect(description).not.toContain('achv.');
+      expect(label.length).toBeGreaterThan(0);
+      expect(description.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('substitutes the tile value into the shared parametric string', () => {
+    const tile2048 = ALL.find((a) => a.id === 'tile-2048');
+    expect(tile2048).toBeDefined();
+
+    expect(describeAchievement(tile2048!, speak('en')).label).toBe('Reach 2048');
+    expect(describeAchievement(tile2048!, speak('es')).label).toBe('Llegar a 2048');
+  });
+
+  it('falls back to the engine wording for an id the dictionary has never heard of', () => {
+    const unknown = { id: 'invented-later', label: 'Invented', description: 'Later.', achieved: false };
+
+    expect(describeAchievement(unknown, speak('es'))).toEqual({
+      label: 'Invented',
+      description: 'Later.',
+    });
   });
 });

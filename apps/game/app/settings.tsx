@@ -15,6 +15,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PageScroll } from '../src/components/PageScroll';
 import { Button, Card, Row, TOUCH_TARGET } from '../src/components/ui';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { useGameStore } from '../src/stores/gameStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useStatsStore } from '../src/stores/statsStore';
@@ -23,14 +25,10 @@ import { useTheme } from '../src/theme/useTheme';
 
 const SIZES = Array.from({ length: MAX_SIZE - MIN_SIZE + 1 }, (_, i) => MIN_SIZE + i);
 
-const UNDO_OPTIONS: Array<{ label: string; value: number }> = [
-  { label: 'Off', value: 0 },
-  { label: 'One move', value: 1 },
-  { label: 'Unlimited', value: -1 },
-];
-
 export default function SettingsScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.settings.title'));
   const insets = useSafeAreaInsets();
 
   const settings = useSettingsStore();
@@ -39,6 +37,12 @@ export default function SettingsScreen() {
   const resetStats = useStatsStore((s) => s.resetStats);
   const currentSize = useGameStore((s) => s.game.size);
   const currentScore = useGameStore((s) => s.game.score);
+
+  const undoOptions = [
+    { label: t('settings.undo.off'), value: 0 },
+    { label: t('settings.undo.one'), value: 1 },
+    { label: t('settings.undo.unlimited'), value: -1 },
+  ];
 
   const [confirmingSize, setConfirmingSize] = useState<number | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
@@ -86,30 +90,29 @@ export default function SettingsScreen() {
     >
       {/* Route titles live here now that the layout uses Slot. */}
       <Head>
-        <title>Settings · 2048</title>
-        <meta name="description" content="Board size, themes, undo and accessibility options." />
+        <title>{t('meta.settings.title')}</title>
+        <meta name="description" content={t('settings.size.help')} />
       </Head>
 
       <View style={styles.inner}>
         <Row style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Settings</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('settings.title')}</Text>
           <Link href="/" style={[styles.link, { color: theme.colors.accent }]}>
-            Done
+            {t('nav.done')}
           </Link>
         </Row>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Board size</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.size.title')}</Text>
           <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-            Anything from a quick 3×3 to a sprawling 8×8. Changing size starts a new game.
+            {t('settings.size.help')}
           </Text>
           {confirmingSize !== null ? (
             <Text style={[styles.warning, { color: theme.colors.text }]}>
-              Switching to {confirmingSize}×{confirmingSize} starts a new game and discards
-              your current one, worth {currentScore} points. Tap it again to confirm.
+              {t('settings.size.confirm', { size: confirmingSize, score: currentScore })}
             </Text>
           ) : null}
-          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel="Board size">
+          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel={t('settings.size.title')}>
             {SIZES.map((size) => (
               <Button
                 key={size}
@@ -125,27 +128,27 @@ export default function SettingsScreen() {
         </Card>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Theme</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.theme.title')}</Text>
           <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-            Wing is the house look. Pick System to follow your device instead.
+            {t('settings.theme.help')}
           </Text>
-          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel="Theme">
+          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel={t('settings.theme.title')}>
             <Button
-              label="System"
+              label={t('settings.theme.system')}
               onPress={() => settings.setThemePreference('system')}
               theme={theme}
               variant={settings.themePreference === 'system' ? 'primary' : 'secondary'}
               selected={settings.themePreference === 'system'}
               style={styles.chip}
             />
-            {THEME_LIST.map((t) => (
+            {THEME_LIST.map((th) => (
               <Button
-                key={t.id}
-                label={t.label}
-                onPress={() => settings.setThemePreference(t.id)}
+                key={th.id}
+                label={t(`theme.${th.id}` as 'theme.wing')}
+                onPress={() => settings.setThemePreference(th.id)}
                 theme={theme}
-                variant={settings.themePreference === t.id ? 'primary' : 'secondary'}
-                selected={settings.themePreference === t.id}
+                variant={settings.themePreference === th.id ? 'primary' : 'secondary'}
+                selected={settings.themePreference === th.id}
                 style={styles.chip}
               />
             ))}
@@ -153,9 +156,9 @@ export default function SettingsScreen() {
         </Card>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Undo</Text>
-          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel="Undo depth">
-            {UNDO_OPTIONS.map((option) => (
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.undo.title')}</Text>
+          <Row style={styles.wrapRow} accessibilityRole="radiogroup" accessibilityLabel={t('settings.undo.title')}>
+            {undoOptions.map((option) => (
               <Button
                 key={option.label}
                 label={option.label}
@@ -173,16 +176,16 @@ export default function SettingsScreen() {
           <Row style={styles.switchRow}>
             <View style={styles.switchLabel}>
               <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                Reduce motion
+                {t('settings.motion.title')}
               </Text>
               <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-                Turn off tile sliding and pop animations.
+                {t('settings.motion.help')}
               </Text>
             </View>
             <Switch
               value={settings.reducedMotion}
               onValueChange={settings.setReducedMotion}
-              accessibilityLabel="Reduce motion"
+              accessibilityLabel={t('settings.motion.title')}
               // React Native Web renders a 20x40 switch by default, against the
               // 44px target the rest of the app keeps to.
               style={styles.switch}
@@ -192,15 +195,15 @@ export default function SettingsScreen() {
           {Platform.OS !== 'web' ? (
             <Row style={[styles.switchRow, styles.switchDivider]}>
               <View style={styles.switchLabel}>
-                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Haptics</Text>
+                <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.haptics.title')}</Text>
                 <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-                  Vibrate on merges and game over.
+                  {t('settings.haptics.help')}
                 </Text>
               </View>
               <Switch
                 value={settings.hapticsEnabled}
                 onValueChange={settings.setHapticsEnabled}
-                accessibilityLabel="Haptics"
+                accessibilityLabel={t('settings.haptics.title')}
                 style={styles.switch}
               />
             </Row>
@@ -208,24 +211,23 @@ export default function SettingsScreen() {
         </Card>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Data</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('settings.data.title')}</Text>
           <Text style={[styles.help, { color: theme.colors.textMuted }]}>
-            Everything is stored on this device only. Nothing is ever uploaded.
+            {t('settings.data.help')}
           </Text>
           {confirmingReset ? (
             <Text style={[styles.warning, { color: theme.colors.text }]}>
-              This erases your statistics, every best score, all settings and the game in
-              progress. It cannot be undone.
+              {t('settings.data.reset.warning')}
             </Text>
           ) : null}
           <Button
-            label={confirmingReset ? 'Yes, erase everything' : 'Reset all data'}
+            label={confirmingReset ? t('settings.data.reset.confirm') : t('settings.data.reset')}
             onPress={resetAll}
             theme={theme}
             variant="secondary"
             style={styles.resetButton}
             accessibilityHint={
-              confirmingReset ? 'Permanently erases all saved data' : undefined
+              confirmingReset ? t('settings.data.reset.hint') : undefined
             }
           />
         </Card>

@@ -13,6 +13,8 @@ import { PageScroll } from '../src/components/PageScroll';
 import { Board } from '../src/components/Board';
 import { GameOverlay } from '../src/components/GameOverlay';
 import { Button, IconButton, Row, ScorePill, navChipStyle } from '../src/components/ui';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { useKeyboard } from '../src/hooks/useKeyboard';
 import { useViewportSize } from '../src/hooks/useViewportSize';
 import { MoveAnnouncer } from '../src/components/MoveAnnouncer';
@@ -35,6 +37,8 @@ const MIN_BOARD = 300;
 
 export default function GameScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.game.title'));
   const insets = useSafeAreaInsets();
 
   const game = useGameStore((s) => s.game);
@@ -169,10 +173,10 @@ export default function GameScreen() {
     >
       {/* Expo Router owns <head> on web; a <title> in +html.tsx gets cleared. */}
       <Head>
-        <title>2048 — Free and Ad-Free</title>
+        <title>{t('meta.game.title')}</title>
         <meta
           name="description"
-          content="A free, ad-free, tracking-free 2048. Works offline. No accounts, no analytics, no third-party requests. Your data never leaves your device."
+          content={t('meta.game.description')}
         />
       </Head>
 
@@ -191,7 +195,7 @@ export default function GameScreen() {
           <View style={styles.titleBlock}>
             <Text style={[styles.title, { color: theme.colors.text }]}>2048</Text>
             <Text style={[styles.tagline, { color: theme.colors.textMuted }]}>
-              Free · No ads · No tracking
+              {t('game.tagline')}
             </Text>
           </View>
 
@@ -202,19 +206,19 @@ export default function GameScreen() {
             */}
             <IconButton
               glyph="↺"
-              accessibilityLabel="Undo"
+              accessibilityLabel={t('game.undo')}
               onPress={handleUndo}
               theme={theme}
               disabled={!canUndo}
-              accessibilityHint="Take back your last move"
+              accessibilityHint={t('game.undo.hint')}
             />
-            <ScorePill label="Score" value={game.score} theme={theme} />
+            <ScorePill label={t('game.score')} value={game.score} theme={theme} />
             {/*
               Bests are tracked per board size — a 3x3 best is not comparable to
               an 8x8 one. Naming the size keeps that from looking like a reset
               when the player switches sizes.
             */}
-            <ScorePill label={`Best ${game.size}×${game.size}`} value={best} theme={theme} />
+            <ScorePill label={t('game.best', { size: game.size })} value={best} theme={theme} />
           </Row>
         </Row>
 
@@ -262,13 +266,13 @@ export default function GameScreen() {
           Nested Text keeps it on one line at any size.
         */}
         <Text style={[styles.hint, { color: theme.colors.textMuted }]}>
-          Swipe to move — or use the arrow keys.{' '}
+          {t('game.hint')}{' '}
           <Link href="/how-to-play" style={[styles.hintLink, { color: theme.colors.text }]}>
-            How to play
+            {t('game.howToPlay')}
           </Link>
           {'  ·  '}
           <Link href="/watch" style={[styles.hintLink, { color: theme.colors.text }]}>
-            Watch a game
+            {t('game.watch')}
           </Link>
         </Text>
 
@@ -284,12 +288,12 @@ export default function GameScreen() {
         {narrow ? (
           <Row style={styles.footer}>
             <Button
-              label={confirmingNewGame ? 'Discard and restart' : 'New game'}
+              label={confirmingNewGame ? t('game.newGame.confirm') : t('game.newGame')}
               onPress={handleNewGame}
               theme={theme}
               accessibilityHint={
                 confirmingNewGame
-                  ? `This discards your game worth ${game.score} points and cannot be undone`
+                  ? t('game.newGame.hint', { score: game.score })
                   : undefined
               }
             />
@@ -299,24 +303,24 @@ export default function GameScreen() {
         <Row style={styles.footer}>
           {narrow ? null : (
             <Button
-              label={confirmingNewGame ? 'Discard and restart' : 'New game'}
+              label={confirmingNewGame ? t('game.newGame.confirm') : t('game.newGame')}
               onPress={handleNewGame}
               theme={theme}
               accessibilityHint={
                 confirmingNewGame
-                  ? `This discards your game worth ${game.score} points and cannot be undone`
+                  ? t('game.newGame.hint', { score: game.score })
                   : undefined
               }
             />
           )}
           <Link href="/settings" style={navChipStyle(theme)}>
-            Settings
+            {t('nav.settings')}
           </Link>
           <Link href="/stats" style={navChipStyle(theme)}>
-            Stats
+            {t('nav.stats')}
           </Link>
           <Link href="/about" style={navChipStyle(theme)}>
-            About
+            {t('nav.about')}
           </Link>
         </Row>
 

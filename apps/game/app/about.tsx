@@ -13,6 +13,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PageScroll } from '../src/components/PageScroll';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { Card, Row } from '../src/components/ui';
 import { useTheme } from '../src/theme/useTheme';
 
@@ -20,6 +22,8 @@ const ORIGINAL_REPO = 'https://github.com/gabrielecirulli/2048';
 
 export default function AboutScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.about.title'));
   const insets = useSafeAreaInsets();
 
   return (
@@ -32,47 +36,40 @@ export default function AboutScreen() {
     >
       {/* Route titles live here now that the layout uses Slot. */}
       <Head>
-        <title>About · 2048</title>
-        <meta name="description" content="Why this 2048 is free, ad-free, and sends no data anywhere." />
+        <title>{t('meta.about.title')}</title>
+        <meta name="description" content={t('about.privacy.body')} />
       </Head>
 
       <View style={styles.inner}>
         <Row style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>About</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('about.title')}</Text>
           <Link href="/" style={[styles.link, { color: theme.colors.accent }]}>
-            Done
+            {t('nav.done')}
           </Link>
         </Row>
 
         <Card theme={theme}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Free, and free of ads
+            {t('about.free.title')}
           </Text>
           <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-            I built this version because I love 2048 and I hate ads. There are no
-            banners, no interstitials, no “watch a video to continue”, and no
-            paid upgrade. There never will be.
+            {t('about.free.body')}
           </Text>
         </Card>
 
         <Card theme={theme}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            No tracking, no network
+            {t('about.privacy.title')}
           </Text>
           <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-            This app sends no data anywhere. It contacts no server other than the
-            one it was loaded from, and makes no third-party requests at all — no
-            analytics, no telemetry, no tracking SDKs, no accounts. Your scores,
-            settings and statistics are stored on this device and never leave it.
+            {t('about.privacy.body')}
           </Text>
         </Card>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Credit</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('about.credit.title')}</Text>
           <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-            Inspired by the original 2048 by Gabriele Cirulli, released under the
-            MIT licence. This is an independent, freshly written version and is
-            not affiliated with or endorsed by the original author.
+            {t('about.credit.body')}
           </Text>
           {/*
             A real anchor, not a Pressable with a link role. The old version
@@ -86,19 +83,18 @@ export default function AboutScreen() {
             rel="noopener noreferrer"
             style={[styles.inlineLink, { color: theme.colors.accent }]}
           >
-            View the original project
+            {t('about.credit.link')}
           </Link>
         </Card>
 
         <Card theme={theme}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Licence</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>{t('about.licence.title')}</Text>
           <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-            This app is MIT licensed. The original 2048 is © 2014 Gabriele
-            Cirulli, also MIT licensed.
+            {t('about.licence.body')}
           </Text>
         </Card>
 
-        <Text style={[styles.version, { color: theme.colors.textMuted }]}>Version 0.1.0</Text>
+        <Text style={[styles.version, { color: theme.colors.textMuted }]}>{t('about.version', { version: '0.1.0' })}</Text>
       </View>
     </PageScroll>
   );

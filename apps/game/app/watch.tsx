@@ -21,6 +21,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Board } from '../src/components/Board';
 import { PageScroll } from '../src/components/PageScroll';
 import { Button, Row, ScorePill, navChipStyle } from '../src/components/ui';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { useViewportSize } from '../src/hooks/useViewportSize';
 import type { VanishingTile } from '../src/stores/gameStore';
 import { useGameStore } from '../src/stores/gameStore';
@@ -29,9 +31,9 @@ import { useTheme } from '../src/theme/useTheme';
 
 /** Milliseconds between moves, slowest first. */
 const SPEEDS = [
-  { label: 'Slow', ms: 420 },
-  { label: 'Normal', ms: 200 },
-  { label: 'Fast', ms: 90 },
+  { key: 'watch.speed.slow', ms: 420 },
+  { key: 'watch.speed.normal', ms: 200 },
+  { key: 'watch.speed.fast', ms: 90 },
 ] as const;
 
 /** Pause on the final position before starting a new game. */
@@ -62,6 +64,8 @@ function fresh(size: number, seed: number): Demo {
 
 export default function WatchScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.watch.title'));
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { width: viewportWidth, height: viewportHeight } = useViewportSize();
@@ -187,24 +191,24 @@ export default function WatchScreen() {
       ]}
     >
       <Head>
-        <title>Watch a game · 2048</title>
+        <title>{t('meta.watch.title')}</title>
         <meta
           name="description"
-          content="Watch a computer play 2048 using the corner strategy, then take the position over and finish it yourself."
+          content={t('watch.title')}
         />
       </Head>
 
       <View style={styles.inner}>
         <Row style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>Watch a game</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('watch.title')}</Text>
           <Link href="/" style={navChipStyle(theme)}>
-            Done
+            {t('nav.done')}
           </Link>
         </Row>
 
         <Row style={styles.status}>
-          <ScorePill label="Score" value={demo.game.score} theme={theme} />
-          <ScorePill label="Best tile" value={best} theme={theme} />
+          <ScorePill label={t('game.score')} value={demo.game.score} theme={theme} />
+          <ScorePill label={t('watch.bestTile')} value={best} theme={theme} />
         </Row>
 
         <View style={styles.boardWrap}>
@@ -224,19 +228,18 @@ export default function WatchScreen() {
         </View>
 
         <Text style={[styles.note, { color: theme.colors.textMuted }]}>
-          It keeps its biggest tile in a corner and builds a run along the edge — the
-          same habit from step 5 of{' '}
+          {t('watch.note.before')}
           <Link href="/how-to-play" style={[styles.noteLink, { color: theme.colors.text }]}>
-            how to play
+            {t('watch.note.link')}
           </Link>
-          . Around half its games reach 2048.
+          {t('watch.note.after')}
         </Text>
 
-        <Row style={styles.speeds} accessibilityRole="radiogroup" accessibilityLabel="Playback speed">
+        <Row style={styles.speeds} accessibilityRole="radiogroup" accessibilityLabel={t('watch.title')}>
           {SPEEDS.map((speed, index) => (
             <Button
-              key={speed.label}
-              label={speed.label}
+              key={speed.key}
+              label={t(speed.key)}
               onPress={() => setSpeedIndex(index)}
               theme={theme}
               variant={index === speedIndex ? 'primary' : 'secondary'}
@@ -247,26 +250,25 @@ export default function WatchScreen() {
 
         {confirmingTakeOver ? (
           <Text style={[styles.warning, { color: theme.colors.text }]}>
-            You have a game in progress worth {playerScore} points. Taking over replaces
-            it, and that cannot be undone.
+            {t('watch.takeOver.warning', { score: playerScore })}
           </Text>
         ) : null}
 
         <Row style={styles.actions}>
           <Button
-            label={paused ? 'Resume' : 'Pause'}
+            label={paused ? t('watch.resume') : t('watch.pause')}
             onPress={() => setPaused((p) => !p)}
             theme={theme}
             variant="secondary"
           />
           <Button
-            label={confirmingTakeOver ? 'Replace my game' : 'Take over'}
+            label={confirmingTakeOver ? t('watch.takeOver.confirm') : t('watch.takeOver')}
             onPress={takeOver}
             theme={theme}
             accessibilityHint={
               confirmingTakeOver
-                ? `This discards your game in progress, worth ${playerScore} points`
-                : 'Continue this exact position yourself'
+                ? t('watch.takeOver.hintConfirm', { score: playerScore })
+                : t('watch.takeOver.hint')
             }
           />
         </Row>

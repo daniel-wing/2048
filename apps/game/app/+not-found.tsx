@@ -13,11 +13,15 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PageScroll } from '../src/components/PageScroll';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { Row, navChipStyle } from '../src/components/ui';
 import { useTheme } from '../src/theme/useTheme';
 
 export default function NotFoundScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.notFound.title'));
   const insets = useSafeAreaInsets();
 
   return (
@@ -29,24 +33,23 @@ export default function NotFoundScreen() {
       ]}
     >
       <Head>
-        <title>Not found · 2048</title>
+        <title>{t('meta.notFound.title')}</title>
         {/* A 404 has no business in a search index. */}
         <meta name="robots" content="noindex" />
       </Head>
 
       <View style={styles.inner}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Nothing here</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>{t('notFound.title')}</Text>
         <Text style={[styles.body, { color: theme.colors.textMuted }]}>
-          That page does not exist. The game itself is fine — this is just a link that
-          points somewhere that never was, or somewhere that has moved.
+          {t('notFound.body')}
         </Text>
 
         <Row style={styles.actions}>
           <Link href="/" style={navChipStyle(theme)}>
-            Back to the game
+            {t('notFound.back')}
           </Link>
           <Link href="/how-to-play" style={navChipStyle(theme)}>
-            How to play
+            {t('game.howToPlay')}
           </Link>
         </Row>
       </View>

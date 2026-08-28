@@ -315,10 +315,11 @@ export const THEME_LIST: Theme[] = [wing, classic, dark, contrast, neon, forest]
 /**
  * Typography.
  *
- * Mirrors the wing.cx stack. The font is deliberately NOT fetched from Google
- * Fonts the way the main site does — this app's promise is that it makes zero
- * network requests, and a webfont request would hand the user's IP to a third
- * party on every load. Where Plus Jakarta Sans is not already available the
+ * Mirrors the wing.cx stack. Plus Jakarta Sans is self-hosted and served from
+ * our own origin, never fetched from Google Fonts — this app makes no
+ * third-party requests at all, and a webfont request would hand the user's IP
+ * to one on every load. (wing.cx itself self-hosts it for the same reason.)
+ * Where Plus Jakarta Sans is not already available the
  * stack falls through to the platform UI font, which is a close enough match in
  * weight and proportion for tile numerals.
  */

@@ -22,14 +22,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Board } from '../src/components/Board';
 import { PageScroll } from '../src/components/PageScroll';
 import { Button, Row, navChipStyle } from '../src/components/ui';
+import { useDocumentTitle } from '../src/i18n/useDocumentTitle';
+import { useT } from '../src/i18n/useT';
 import { useViewportSize } from '../src/hooks/useViewportSize';
 import type { VanishingTile } from '../src/stores/gameStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
 import { useTheme } from '../src/theme/useTheme';
 
 type Step = {
-  title: string;
-  body: string;
+  /** Index into the howto.N.* string keys. */
+  n: 1 | 2 | 3 | 4 | 5 | 6;
   grid: number[][];
   moves: Direction[];
   /** Whether a new tile drops in after each move. Off unless it is the point. */
@@ -38,8 +40,7 @@ type Step = {
 
 const STEPS: Step[] = [
   {
-    title: 'Everything slides',
-    body: 'Swipe, or use the arrow keys. Every tile slides as far as it can in that direction, all at once.',
+    n: 1,
     grid: [
       [0, 0, 2, 0],
       [0, 4, 0, 0],
@@ -49,8 +50,7 @@ const STEPS: Step[] = [
     moves: ['left'],
   },
   {
-    title: 'Matching tiles merge',
-    body: 'When two tiles with the same number meet, they become one tile worth double — and you score that much.',
+    n: 2,
     grid: [
       [2, 0, 0, 2],
       [0, 0, 0, 0],
@@ -60,8 +60,7 @@ const STEPS: Step[] = [
     moves: ['left'],
   },
   {
-    title: 'One merge per tile, per move',
-    body: 'A tile that has just merged is done for that move. Four 4s become two 8s, not a single 16.',
+    n: 3,
     grid: [
       [4, 4, 4, 4],
       [0, 0, 0, 0],
@@ -71,8 +70,7 @@ const STEPS: Step[] = [
     moves: ['left'],
   },
   {
-    title: 'A new tile appears',
-    body: 'After every move that changes something, a new 2 or 4 drops into a free square. The board fills up whether you are ready or not.',
+    n: 4,
     grid: [
       [2, 0, 0, 2],
       [0, 4, 0, 0],
@@ -83,8 +81,7 @@ const STEPS: Step[] = [
     spawn: true,
   },
   {
-    title: 'Keep your biggest in a corner',
-    body: 'The one habit that changes everything. Pick a corner, keep your largest tile there, and build a run of decreasing tiles along that edge.',
+    n: 5,
     grid: [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
@@ -94,8 +91,7 @@ const STEPS: Step[] = [
     moves: ['left'],
   },
   {
-    title: 'Reach 2048 to win',
-    body: 'Two 1024s make it. You can carry on afterwards for a bigger score — plenty of people go for 4096.',
+    n: 6,
     grid: [
       [0, 0, 0, 0],
       [0, 0, 0, 0],
@@ -132,6 +128,8 @@ function initial(step: Step): DemoState {
 
 export default function HowToPlayScreen() {
   const theme = useTheme();
+  const t = useT();
+  useDocumentTitle(t('meta.howto.title'));
   const insets = useSafeAreaInsets();
   const { width: viewportWidth, height: viewportHeight } = useViewportSize();
   const reducedMotion = useSettingsStore((s) => s.reducedMotion);
@@ -237,18 +235,18 @@ export default function HowToPlayScreen() {
       ]}
     >
       <Head>
-        <title>How to play · 2048</title>
+        <title>{t('meta.howto.title')}</title>
         <meta
           name="description"
-          content="A short animated walkthrough of the rules of 2048, and the one habit that makes it click."
+          content={t('howto.title')}
         />
       </Head>
 
       <View style={styles.inner}>
         <Row style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>How to play</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{t('howto.title')}</Text>
           <Link href="/" style={navChipStyle(theme)}>
-            Done
+            {t('nav.done')}
           </Link>
         </Row>
 
@@ -271,25 +269,25 @@ export default function HowToPlayScreen() {
         <View
           style={styles.lesson}
           accessibilityLiveRegion="polite"
-          accessibilityLabel={`Step ${stepIndex + 1} of ${STEPS.length}. ${step.title}. ${step.body}`}
+          accessibilityLabel={`${t('howto.step', { current: stepIndex + 1, total: STEPS.length })}. ${t(`howto.${step.n}.title` as 'howto.1.title')}. ${t(`howto.${step.n}.body` as 'howto.1.body')}`}
         >
           <Text style={[styles.stepCount, { color: theme.colors.textMuted }]}>
-            Step {stepIndex + 1} of {STEPS.length}
+            {t('howto.step', { current: stepIndex + 1, total: STEPS.length })}
           </Text>
-          <Text style={[styles.stepTitle, { color: theme.colors.text }]}>{step.title}</Text>
-          <Text style={[styles.stepBody, { color: theme.colors.textMuted }]}>{step.body}</Text>
+          <Text style={[styles.stepTitle, { color: theme.colors.text }]}>{t(`howto.${step.n}.title` as 'howto.1.title')}</Text>
+          <Text style={[styles.stepBody, { color: theme.colors.textMuted }]}>{t(`howto.${step.n}.body` as 'howto.1.body')}</Text>
         </View>
 
         <Row style={styles.controls}>
           <Button
-            label={paused ? 'Play' : 'Pause'}
+            label={paused ? t('howto.resume') : t('howto.pause')}
             onPress={() => setPaused((p) => !p)}
             theme={theme}
             variant="secondary"
-            accessibilityHint={paused ? 'Resume the animation' : 'Stop the animation looping'}
+            accessibilityHint={paused ? t('howto.resume.hint') : t('howto.pause.hint')}
           />
           <Button
-            label="Back"
+            label={t('nav.back')}
             onPress={() => setStepIndex((i) => Math.max(0, i - 1))}
             theme={theme}
             variant="secondary"
@@ -297,10 +295,10 @@ export default function HowToPlayScreen() {
           />
           {isLast ? (
             <Link href="/" style={navChipStyle(theme)}>
-              Play
+              {t('nav.play')}
             </Link>
           ) : (
-            <Button label="Next" onPress={() => setStepIndex((i) => i + 1)} theme={theme} />
+            <Button label={t('nav.next')} onPress={() => setStepIndex((i) => i + 1)} theme={theme} />
           )}
         </Row>
       </View>

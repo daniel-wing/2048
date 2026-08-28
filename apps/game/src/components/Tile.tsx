@@ -139,7 +139,6 @@ function TileComponent({
       <Text
         allowFontScaling={false}
         style={[styles.label, { color: palette.fg, fontSize }]}
-        accessibilityLabel={`Tile ${value}`}
       >
         {value}
       </Text>

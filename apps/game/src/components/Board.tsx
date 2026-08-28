@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
 
+import { useT } from '../i18n/useT';
 import { useSwipe } from '../hooks/useSwipe';
 import type { VanishingTile } from '../stores/gameStore';
 import { boardGestureStyle } from '../platform/boardGesture';
@@ -45,6 +46,7 @@ export function Board({
   reducedMotion = false,
   interactive = true,
 }: BoardProps) {
+  const t = useT();
   const gesture = useSwipe(onMove, interactive);
 
   // Gap and cell size derive from the board's pixel size so the same layout
@@ -68,17 +70,19 @@ export function Board({
       for (let col = 0; col < size; col++) {
         const cell = board[row]?.[col];
         // One-based, because these are read aloud to a person.
-        const where = `row ${row + 1}, column ${col + 1}`;
+        const where = { row: row + 1, col: col + 1 };
         out.push({
           key: `${row}-${col}`,
           row,
           col,
-          label: cell ? `${where}, ${cell.value}` : `${where}, empty`,
+          label: cell
+            ? t('a11y.cell', { ...where, value: cell.value })
+            : t('a11y.cellEmpty', where),
         });
       }
     }
     return out;
-  }, [size, board]);
+  }, [size, board, t]);
 
   const tiles = useMemo(() => {
     const out: Array<{ id: number; value: number; row: number; col: number }> = [];
@@ -96,7 +100,7 @@ export function Board({
         // list has no "grid", but the ARIA props pass straight through on web
         // and are the ones that make the board navigable.
         role="grid"
-        aria-label={`${size} by ${size} game board`}
+        aria-label={t('a11y.board', { size })}
         style={[
           styles.board,
           {

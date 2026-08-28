@@ -19,6 +19,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useT, type Translate } from '../i18n/useT';
 import type { MoveOutcome } from '../stores/gameStore';
 
 /**
@@ -29,35 +30,35 @@ import type { MoveOutcome } from '../stores/gameStore';
  */
 const THROTTLE_MS = 700;
 
-const DIRECTION_WORD: Record<string, string> = {
-  up: 'up',
-  down: 'down',
-  left: 'left',
-  right: 'right',
-};
+export function describeOutcome(outcome: MoveOutcome, t: Translate): string {
+  // Directions are translated as words, not codes: "hacia la izquierda" needs
+  // the article, which is why the dictionary carries the whole phrase.
+  const direction = t(`dir.${outcome.dir}` as 'dir.up');
 
-export function describeOutcome(outcome: MoveOutcome): string {
-  const direction = DIRECTION_WORD[outcome.dir] ?? outcome.dir;
+  if (!outcome.moved) return t('a11y.noMove', { direction });
 
-  if (!outcome.moved) return `No move ${direction}.`;
+  const parts = [t('a11y.moved', { direction })];
 
-  const parts = [`Moved ${direction}.`];
-
-  if (outcome.merged.length === 1) {
-    parts.push(`Merged to ${outcome.merged[0]}.`);
-  } else if (outcome.merged.length > 1) {
-    parts.push(`Merged to ${outcome.merged.join(' and ')}.`);
+  if (outcome.merged.length > 0) {
+    const values =
+      outcome.merged.length === 1
+        ? String(outcome.merged[0])
+        : outcome.merged.slice(0, -1).join(', ') +
+          ` ${t('a11y.and')} ` +
+          outcome.merged[outcome.merged.length - 1];
+    parts.push(t('a11y.merged', { values }));
+    parts.push(t('a11y.scoreNow', { score: outcome.score }));
   }
-
-  if (outcome.merged.length > 0) parts.push(`Score ${outcome.score}.`);
 
   if (outcome.spawned) {
     // The most useful half: the board changed underneath them, and this is the
     // only part they could not have predicted.
     parts.push(
-      `New tile ${outcome.spawned.value} at row ${outcome.spawned.row + 1}, column ${
-        outcome.spawned.col + 1
-      }.`,
+      t('a11y.spawned', {
+        value: outcome.spawned.value,
+        row: outcome.spawned.row + 1,
+        col: outcome.spawned.col + 1,
+      }),
     );
   }
 
@@ -65,6 +66,7 @@ export function describeOutcome(outcome: MoveOutcome): string {
 }
 
 export function MoveAnnouncer({ outcome }: { outcome: MoveOutcome | null }) {
+  const t = useT();
   const [message, setMessage] = useState('');
   const lastSpokenAt = useRef(0);
   const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -81,7 +83,7 @@ export function MoveAnnouncer({ outcome }: { outcome: MoveOutcome | null }) {
         DOM text differ while what is spoken does not.
       */
       const marker = outcome.seq % 2 === 0 ? '​' : '';
-      setMessage(describeOutcome(outcome) + marker);
+      setMessage(describeOutcome(outcome, t) + marker);
     };
 
     const since = Date.now() - lastSpokenAt.current;
@@ -96,7 +98,7 @@ export function MoveAnnouncer({ outcome }: { outcome: MoveOutcome | null }) {
     return () => {
       if (pending.current) clearTimeout(pending.current);
     };
-  }, [outcome]);
+  }, [outcome, t]);
 
   return (
     <View
