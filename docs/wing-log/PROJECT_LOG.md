@@ -68,8 +68,8 @@ routing, all left uncommitted for review.
   properties rather than eyeballed. See topic-visual-identity.
 - Did NOT load the brand font from Google Fonts, because that would break the
   zero-network guarantee. This is the main open item.
-- Replaced the untracked 2048 export left in the site repo by an earlier attempt
-  from the 2048_cursor project, with the user's explicit go-ahead.
+- Replaced an untracked 2048 export left in the site repo by an earlier,
+  abandoned attempt at the game, with the owner's explicit go-ahead.
 - Corrected the site's vercel rewrites, which pointed the game's sub-routes at
   index.html. This build is statically rendered with a real file per route.
 
@@ -145,3 +145,44 @@ shell in `+html.tsx` emits a `<title>` that every route then duplicates. Two
 title elements is invalid HTML and the shell's one always loses, but a comment
 there records that removing it once left routes untitled, so it was left alone
 rather than re-broken on the way out the door.
+
+### 2026-08-27 - The repo stands on its own
+
+**Summary:** Made this repository self-contained. It had been reaching into the
+wing.cx checkout to build, preview and publish; now it builds and deploys
+itself, and the site reaches it through a single rewrite rule.
+
+**Topics touched:** topic-architecture, topic-web-platform
+
+**Key outcomes:**
+- **Standing rule, set by the owner: nothing outside this repo is ever touched
+  again.** Not a scoped subdirectory, not a one-line edit. Anything the site
+  needs is prepared here as a diff and handed over.
+- The build used to be committed into the site repo, which added ~2 MB of
+  freshly content-hashed bundles to that repo's history on every release, for a
+  generated directory nobody would ever read back. The site repo's own README
+  already warned about this. It now holds none of it.
+- **`baseUrl` deliberately stays `/ships/2048` even though this deployment could
+  serve at its root.** The game's URL, every emitted asset path, the service
+  worker scope and anything already indexed all depend on that prefix. Moving to
+  the root would have been tidier and broken all four for no gain, so
+  `scripts/build-deploy.mjs` relocates the flat export to where its own URLs
+  resolve instead.
+- Deleting `_sitemap.html` was a manual post-build step that had to be
+  remembered every single time. It is part of the build now.
+- **Two origins now serve identical bytes**, which is a duplicate-content
+  problem that did not exist when there was only one. The build writes a
+  `Disallow: /` robots.txt at *this* origin's root; wing.cx serves its own from
+  its own root, so the canonical path is unaffected.
+- `scripts/serve-site.py` served a checkout of the site and hardcoded
+  `~/Projects/wing.cx`. It is now `serve-local.py` and serves `build/` using
+  this repo's own vercel.json, so local preview matches production without
+  anything else existing on the machine.
+
+**Worth knowing:** opened at its own origin the deployment has no site header or
+footer, because those load from the site's root. The fallback chrome in
+`+html.tsx` covers it and the result is nearly indistinguishable — but the
+EN/ES toggle and the nav labels are inert there, since `site.js` owns both. That
+is the intended split and the reason for the robots.txt above.
+
+**Left open:** still the §4 performance work.

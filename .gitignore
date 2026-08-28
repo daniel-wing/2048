@@ -8,6 +8,10 @@ web-build/
 apps/game/.expo/
 apps/game/dist/
 
+# Deployable tree assembled by scripts/build-deploy.mjs. Vercel builds it on
+# push; committing it is what used to bloat the site repo by 2 MB a release.
+build/
+
 # Editor and tooling state. `.claude/` is owned by tooling whose future writes
 # we do not control (session transcripts, caches, local permission grants), so
 # it is ignored wholesale and the one file worth sharing is allow-listed back.

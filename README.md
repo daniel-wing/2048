@@ -16,7 +16,8 @@ your scores and settings never leave your device.
 
 - Classic 2048 rules with smooth 60fps tile animations
 - **Variable board sizes** — 3×3 up to 8×8
-- **Five themes** — Classic, Dark, High contrast, Neon, Forest (follows your system by default)
+- **Six themes** — Wing (the default), Classic, Dark, High contrast, Neon, Forest
+- **English and Spanish**, following the language chosen on the site around it
 - Undo (off / one move / unlimited)
 - Full-state persistence — close the tab mid-game and pick up exactly where you left off
 - Stats and achievements
@@ -60,6 +61,40 @@ Type-check everything:
 ```bash
 npm run typecheck --workspaces --if-present
 ```
+
+## Building and deploying
+
+```bash
+npm run build
+```
+
+That runs the Expo web export and assembles `build/`, which is what Vercel
+serves. Preview it exactly as production will serve it — prerendered routes,
+catch-all and all:
+
+```bash
+python3 scripts/serve-local.py
+```
+
+Then open http://localhost:8096/ships/2048/
+
+### Why the output sits under `ships/2048/`
+
+The game's home is `https://wing.cx/ships/2048/`, and this repo deploys itself
+to its own Vercel project which that path rewrites through to. The export keeps
+`experiments.baseUrl` set to `/ships/2048`, so every asset URL, the service
+worker scope, and every link already indexed stay exactly as they were when the
+build was committed into the site repo instead. Serving at the domain root
+would have been tidier and would have broken all four.
+
+This repo owns nothing but this game, and touches no other repository. The one
+thing living outside it is a rewrite rule in the site's own `vercel.json`.
+
+Opened directly, the deployment renders with its own fallback chrome rather
+than the site's header and footer, which load from the site's root. That is the
+intended fallback — the game is built to render without the site — and the
+reason this origin serves a `Disallow: /` robots.txt: only the wing.cx URL
+should ever be crawled or linked.
 
 ## Roadmap
 

@@ -13,6 +13,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "web": "npm run web --workspace @2048/game",
     "web:clear": "npm run web:clear --workspace @2048/game",
-    "build:web": "npm run export:web --workspace @2048/game"
+    "build:web": "npm run export:web --workspace @2048/game",
+    "build": "node scripts/build-deploy.mjs"
   }
 }

@@ -25,11 +25,11 @@
       "port": 8090
     },
     {
-      "//": "Serves the wing.cx repo with vercel.json rewrites applied, to check the game in its real home before deploying. Script lives in this repo so it survives between sessions.",
-      "name": "wing-site",
+      "//": "Serves this repo's own build/ with vercel.json rewrites applied, which is exactly how Vercel will serve it. Run `npm run build` first.",
+      "name": "2048-deploy-preview",
       "runtimeExecutable": "python3",
       "runtimeArgs": [
-        "scripts/serve-site.py"
+        "scripts/serve-local.py"
       ],
       "port": 8096
     }
